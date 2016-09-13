@@ -162,12 +162,4 @@ server <- function(input, output, session) {
   
   output$text1 <- renderText({paste("Deliver relevant climatic data to people in the wine industry", input$var)})
   
-  output$background <- renderUI({
-    withMathJax(
-      helpText("Huglin Index: this index is derived from local climatic and weather data. From daily minimum, maximum and average data, the Huglin index is calculated according to equation 1: $$K\\sum_{1.Apr}^{30.Sep}\\frac{(T_{med}-10)+(T_{min}+10)}{2} ~ (1)\\!$$"),
-      helpText("The daily temperature data are reduced by 10 degrees centigrade, which is the temperature below which no growth can be xpected."),
-      helpText("More blurb following...")
-    )
-  })
-  
 }

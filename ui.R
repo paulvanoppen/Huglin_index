@@ -78,16 +78,18 @@ ui <-
                    )))),
       tabPanel("About the Huglin Index",
                fluidRow(column(12, titlePanel("About the Huglin index"))),
-               fluidRow(column(
-                          12,
-                          #verbatimTextOutput("text1"),
-                          uiOutput('background'),
-                          tags$head(tags$style("#background{font-size: 20px; color: black"))
-                        ))),
+               fluidRow(column(12,
+                               h5("Blurb around Jules & Paul"))),
+               fluidRow(column(12,
+                               withMathJax(includeMarkdown("./www/About_Huglin.md"))),
+                        tags$head(tags$style("#background{font-size: 20px; color: black"))
+               )),
       tabPanel("About us",
                fluidRow(column(12, titlePanel("About Jules Nijst and Paul van Oppen"))),
                fluidRow(column(12,
-                        h5("Blurb around Jules & Paul")))
+                        h5("Blurb around Jules & Paul"))),
+               fluidRow(column(12,
+                               includeMarkdown("./www/About_us.md")))
                ),
       # Allign the navbarPanel to the left
       tags$head(tags$style(' 
