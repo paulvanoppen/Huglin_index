@@ -19,7 +19,11 @@ ui <-
       tabPanel("Index",
                fluidRow(column(12, titlePanel("Huglin index for Maastricht", windowTitle = "VintageDataScience: Huglin Index for Maastricht"))),
                fluidRow(column(3,
-                  wellPanel(             
+                  wellPanel(
+                   selectInput("station", "Select station", list(
+                      "Netherlands" = c("Maastricht", "Other"),
+                      "Germany" = c("Trier", "Other")
+                   )),
                    sliderInput(
                      inputId = "year_index",
                      label = "Choose year",
