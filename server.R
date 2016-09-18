@@ -1,5 +1,6 @@
 library(shiny)
 library(ggplot2)
+library(ggvis)
 library(ggthemes)
 library(reshape2)
 library(lubridate)
@@ -29,8 +30,8 @@ server <- function(input, output, session) {
     p <- p + theme(legend.text = element_text(size = 14))
     #p <- p + theme(aspect.ratio=4/10)
     p
-  }  
-  
+  }
+
   myplot2 <- function(DF, year) {
     # plot function for the maximum value of the Huglin Index for each year
     p <- ggplot(data = DF, aes(x = as.numeric(YEAR), y = HI.cumsum))
@@ -62,17 +63,26 @@ server <- function(input, output, session) {
     index <- Huglin.index %>% filter(as.numeric(YEAR) == year & HI.dayofyear == dayofyear) %>% select(HI.cumsum)
     index <- as.character(round(as.numeric(index$HI.cumsum), digits = 1))
     date <- format(strptime(paste(year, dayofyear), format="%Y %j"), format = "%d-%m-%Y")
-    paste0("Date  = ", date, "\nIndex = ", index)
+    paste0("Date  = ", date, "; Index = ", index)
   })
   
   output$distPlot2 <- renderPlot({
     # Render maximum value of Huglin Index (myplot2)
-    year <- input$year_summary
-    HI.max <- Huglin.index[!(Huglin.index$YEAR %in% c("MIN", "MAX")),]
-    DF <- HI.max %>% group_by(YEAR) %>% slice(which.max(HI.cumsum))
+    year <- input$year_summary # get year from slider
+    HI.max <- Huglin.index[!(Huglin.index$YEAR %in% c("MIN", "MAX")),] # subset the DF to contain only yearly data (remove MIN and MAX)
+    DF <- HI.max %>% group_by(YEAR) %>% slice(which.max(HI.cumsum)) # determine the max value per Year
     myplot2(DF, year)
   })
-  
+
+  output$plot_sum_info <- renderText({
+    if (is.null(input$plot_click$x)) return()
+    year <- round(input$plot_click$x, digits = 0)
+    HI.max <- Huglin.index[!(Huglin.index$YEAR %in% c("MIN", "MAX")),] # subset the DF to contain only yearly data (remove MIN and MAX)
+    DF <- HI.max %>% group_by(YEAR) %>% slice(which.max(HI.cumsum)) # determine the max value per Year
+    index <- DF[DF$YEAR == as.character(year), "HI.cumsum"]
+    paste0("Year  = ", year, "; Index = ", index)
+  })
+    
   observeEvent(input$first_btn_idx, {
     # Event handler for button: first_btn_idx, moves slider to first year
     if (is.null(input$first_btn_idx)) return()

@@ -49,7 +49,7 @@ ui <-
                    ))
                ),
                fluidRow(
-                 column(2, offset = 3,
+                 column(3, offset = 3,
                         h5("Click on the graph to read date and index values:"),
                         verbatimTextOutput("plot_index_info"),
                         downloadButton('downloadData', 'Download'))
@@ -78,8 +78,15 @@ ui <-
                      id = "plot-container",
                      tags$img(src = "http://www.ajaxload.info/images/exemples/35.gif",
                               id = "loading-spinner"),
-                     plotOutput("distPlot2")
-                   )))),
+                     plotOutput("distPlot2", click = "plot_click")
+                   ))),
+               fluidRow(column(
+                 3,
+                 offset = 3,
+                 h5("Click on the graph to read date and index values:"),
+                 verbatimTextOutput("plot_sum_info")
+                 #downloadButton('downloadData', 'Download'))
+               ))), 
       tabPanel("About the Huglin Index",
                fluidRow(column(12, titlePanel("About the Huglin index"))),
                fluidRow(column(12,
