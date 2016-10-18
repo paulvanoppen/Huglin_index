@@ -20,9 +20,9 @@ ui <-
                fluidRow(column(12, titlePanel("Huglin index for Maastricht", windowTitle = "VintageDataScience: Huglin Index for Maastricht"))),
                fluidRow(column(3,
                   wellPanel(
-                   selectInput("station", "Select station", list(
-                      "Netherlands" = c("Maastricht", "Other"),
-                      "Germany" = c("Trier", "Other")
+                   selectInput("station1", "Select station", list(
+                      "Netherlands" = c("Maastricht"),
+                      "Germany" = c("Kaiserslautern", "Trier-Petrisberg")
                    )),
                    sliderInput(
                      inputId = "year_index",
@@ -49,7 +49,7 @@ ui <-
                    ))
                ),
                fluidRow(
-                 column(3, offset = 3,
+                 column(4, offset = 3,
                         h5("Click on the graph to read date and index values:"),
                         verbatimTextOutput("plot_index_info"),
                         downloadButton('downloadData', 'Download'))
@@ -58,6 +58,10 @@ ui <-
                fluidRow(column(12, titlePanel("Huglin index for Maastricht: annual maxima", windowTitle = "VintageDataScience: Huglin Index for Maastricht"))),
                fluidRow(column(3,
                   wellPanel(
+                   selectInput("station2", "Select station", list(
+                     "Netherlands" = c("Maastricht"),
+                     "Germany" = c("Kaiserslautern", "Trier-Petrisberg")
+                   )),
                    sliderInput(
                      inputId = "year_summary",
                      label = "Choose year",

@@ -31,6 +31,29 @@ server <- function(input, output, session) {
     #p <- p + theme(aspect.ratio=4/10)
     p
   }
+  
+  myplot1.new <- function(DF, year, Station.Name = "MAASTRICHT") {
+    # plot function for the Huglin Index as a function of day number
+    mypalette <- c("#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3")
+    mypalette <- c(mypalette[1:length(year)], "grey", "grey")
+    #year <- c(year, "MIN", "MAX")
+    DF <- DF[DF$StationName == Station.Name, ]
+    DF <- DF[DF$Year == year & DF$Type == "Data" | DF$Type == "Max" | DF$Type == "Min", ]
+    p <- ggplot(DF, aes(x = HI.dayofyear, y = HI.cumsum, colour = Type))
+    p <- p + geom_line(size = 1.1)
+    p <- p + scale_x_continuous(breaks = c(91,121,152,182,213,244,273), limits = c(91, 273), labels = c("APR","MAY","JUN","JUL","AUG","SEP","OCT"))
+    p <- p + scale_y_continuous(breaks = seq(0, 2000, 400), minor_breaks = seq(0 , 2000, 400), limits = c(0, 2000))
+    p <- p + ylab("Index Huglin\n") + xlab("\nMonth")
+    p <- p + theme(legend.title = element_blank())
+    p <- p + theme(legend.position="bottom")
+    p <- p + scale_color_manual(values = mypalette)
+    p <- p + theme(axis.text.x = element_text(size = 14, family = "sans", face = "bold"))
+    p <- p + theme(axis.text.y = element_text(size = 14, family = "sans", face = "bold"))
+    p <- p + theme(axis.title = element_text(size = 16, family = "sans", face = "bold"))
+    p <- p + theme(legend.text = element_text(size = 14))
+    #p <- p + theme(aspect.ratio=4/10)
+    p
+  }
 
   myplot2 <- function(DF, year) {
     # plot function for the maximum value of the Huglin Index for each year
@@ -48,10 +71,28 @@ server <- function(input, output, session) {
     p
   }
   
+  myplot2.new <- function(DF, year, Station.Name = "MAASTRICHT") {
+    # plot function for the maximum value of the Huglin Index for each year
+    p <- ggplot(data = DF, aes(x = Year, y = HI.cumsum))
+    p <- p + geom_line(size = 1.1, color = "#66C2A5")
+    p <- p + geom_point(data = DF[DF$Year == year, ], shape = 19, size = 5, colour = "red") 
+    p <- p + scale_y_continuous(breaks = seq(1000, 2000, 200), limits = c(1000, 2000))
+    p <- p + scale_x_continuous(breaks = seq(1900, 2015, 10))
+    p <- p + ylab("End-of-year Huglin Index\n") 
+    p <- p + xlab("\nYears")
+    p <- p + theme(axis.text.x = element_text(size = 14, family = "sans", face = "bold"))
+    p <- p + theme(axis.text.y = element_text(size = 14, family = "sans", face = "bold"))
+    p <- p + theme(axis.title = element_text(size = 16, family = "sans", face = "bold"))
+    p <- p + theme(legend.text = element_text(size = 14))
+    p
+  }
+  
   output$distPlot1 <- renderPlot({
     # Render HUglin Index as a function of day number (myplot1)
     year <- input$year_index
-    myplot1(Huglin.index, as.character(year))
+    station <- toupper(input$station1)
+    #myplot1(Huglin.index, as.character(year))
+    myplot1.new(Huglin.index.new, year, station)
   })
   
   output$plot_index_info <- renderText({
@@ -60,27 +101,31 @@ server <- function(input, output, session) {
     dayofyear <- round(input$plot_click$x, digits = 0)
     #index <- input$plot_click$y
     year <- input$year_index
-    index <- Huglin.index %>% filter(as.numeric(YEAR) == year & HI.dayofyear == dayofyear) %>% select(HI.cumsum)
+    station <- toupper(input$station1)
+    index <- Huglin.index.new %>% filter(Year == year & StationName == station & HI.dayofyear == dayofyear) %>% select(HI.cumsum)
     index <- as.character(round(as.numeric(index$HI.cumsum), digits = 1))
     date <- format(strptime(paste(year, dayofyear), format="%Y %j"), format = "%d-%m-%Y")
-    paste0("Date  = ", date, "; Index = ", index)
+    paste0("Date: ", date, "; Huglin Index: ", index)
   })
   
   output$distPlot2 <- renderPlot({
     # Render maximum value of Huglin Index (myplot2)
     year <- input$year_summary # get year from slider
-    HI.max <- Huglin.index[!(Huglin.index$YEAR %in% c("MIN", "MAX")),] # subset the DF to contain only yearly data (remove MIN and MAX)
-    DF <- HI.max %>% group_by(YEAR) %>% slice(which.max(HI.cumsum)) # determine the max value per Year
-    myplot2(DF, year)
+    station <- toupper(input$station2)
+    HI.max <- Huglin.index.new[!(Huglin.index.new$Type %in% c("Min", "Max")),] # subset the DF to contain only yearly data (remove MIN and MAX)
+    DF <- HI.max %>% filter(StationName == station) %>% group_by(Year) %>% slice(which.max(HI.cumsum)) # determine the max value per Year
+    myplot2.new(DF, year)
   })
 
   output$plot_sum_info <- renderText({
     if (is.null(input$plot_click$x)) return()
+    #browser()
     year <- round(input$plot_click$x, digits = 0)
-    HI.max <- Huglin.index[!(Huglin.index$YEAR %in% c("MIN", "MAX")),] # subset the DF to contain only yearly data (remove MIN and MAX)
-    DF <- HI.max %>% group_by(YEAR) %>% slice(which.max(HI.cumsum)) # determine the max value per Year
-    index <- DF[DF$YEAR == as.character(year), "HI.cumsum"]
-    paste0("Year  = ", year, "; Index = ", index)
+    station <- toupper(input$station2)
+    HI.max <- Huglin.index.new[!(Huglin.index.new$Type %in% c("Min", "Max")),] # subset the DF to contain only yearly data (remove MIN and MAX)
+    DF <- HI.max %>% filter(StationName == station) %>% group_by(Year) %>% slice(which.max(HI.cumsum)) # determine the max value per Year
+    index <- DF[DF$Year == year, "HI.cumsum"]
+    paste0("Year: ", year, "; Huglin Index: ", index)
   })
     
   observeEvent(input$first_btn_idx, {
